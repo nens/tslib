@@ -1,5 +1,7 @@
 from .ts_reader import TimeSeriesReader
+from datetime import datetime
 import logging
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -27,21 +29,34 @@ except ImportError:
 class EventTarget(object):
 
     def __init__(self):
-        self.values = []
+        self.datetimes = None
+        self.values = None
+        self.ts = []
 
     def start(self, tag, attrib):
+
+        if tag.endswith('series'):
+            self.datetimes = []
+            self.values = []
+            return
+
         if tag.endswith('event'):
-            value = attrib['value']
-            self.values.append(value)
+            datetime_str = "%s %s" % (attrib['date'], attrib['time'])
+            format_str = "%Y-%m-%d %H:%M:%S"
+            self.datetimes.append(datetime.strptime(datetime_str, format_str))
+            self.values.append(float(attrib['value']))
+            return
 
     def end(self, tag):
-        pass
+
+        if tag.endswith('series'):
+            self.ts.append(pd.Series(self.values, index=self.datetimes))
 
     def data(self, data):
         pass
 
     def close(self):
-        return self.values
+        return self.ts
 
 
 class PiXmlReader(TimeSeriesReader):

@@ -1,5 +1,7 @@
 from .ts_reader import TimeSeriesReader
 from datetime import datetime
+from pytz import FixedOffset
+#import iso8601
 import logging
 import numpy as np
 import pandas as pd
@@ -27,6 +29,19 @@ except ImportError:
             logger.critical('No ElementTree API available')
 
 
+def tz_localize(df, offset_in_hours):
+    """
+
+    df: instance of pandas.DataFrame
+    offset_in_hours:
+    """
+
+    offset_in_minutes = offset_in_hours * 60
+    if not offset_in_minutes.is_integer():
+        raise ValueError
+    df.tz_localize(FixedOffset(int(offset_in_minutes)), copy=False)
+
+
 class EventTarget(object):
     """SAX handler for parsing PI-XML timeseries.
 
@@ -47,6 +62,7 @@ class EventTarget(object):
 
     def start(self, tag, attrib):
 
+        self.is_timeZone = True if tag.endswith('timeZone') else False
         self.is_missVal = True if tag.endswith('missVal') else False
 
         if tag.endswith('series'):
@@ -56,6 +72,11 @@ class EventTarget(object):
             self.comments = []
             self.users = []
         elif tag.endswith('event'):
+            # Pandas 0.8.1 has an issue with timezone-aware datetime objects:
+            # ValueError: Tz-aware datetime.datetime cannot be converted to
+            # datetime64 unless utc=True. Works in 0.9.0.dev-b9848a6.
+            # For the time being, let's work with naive datetimes.
+            # iso8601.parse_date can handle fixed UTC offsets.
             datetime_str = "%s %s" % (attrib['date'], attrib['time'])
             format_str = "%Y-%m-%d %H:%M:%S"
             self.datetimes.append(datetime.strptime(datetime_str, format_str))
@@ -67,7 +88,14 @@ class EventTarget(object):
 
     def end(self, tag):
 
-        if tag.endswith('series'):
+        if tag.endswith('timeZone'):
+            self.is_timeZone = False
+            if not 'timeZone' in self.metadata:
+                # The element is empty, so its default value applies.
+                # For ease and reasons of performance, the default
+                # value, 0.0, is not retrieved from the XSD.
+                self.metadata['timeZone'] = 0.0
+        elif tag.endswith('series'):
             data = {'value': np.array(self.values, np.float)}
             if any(self.flags):
                 data['flag'] = self.flags
@@ -79,20 +107,24 @@ class EventTarget(object):
                 data=data,
                 index=self.datetimes
                 )
-            df.metadata = self.metadata
+            if 'timeZone' in self.metadata:
+                tz_localize(df, self.metadata['timeZone'])
             self.dfs.append(df)
         elif tag.endswith('missVal'):
             self.is_missVal = False
 
     def data(self, data):
 
-        if self.is_missVal:
+        if self.is_timeZone:
+            self.metadata['timeZone'] = float(data)
+        elif self.is_missVal:
             self.metadata['missVal'] = data
 
     def close(self):
         """Returns a list of DataFrames.
 
-        TODO: use a Panel instead?
+        Why not return a Panel? Creating a Panel will not preserve the metadata
+        on each DataFrame. Storing metadata on the Panel seems less convenient.
         """
 
         return self.dfs

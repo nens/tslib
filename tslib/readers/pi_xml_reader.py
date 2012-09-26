@@ -1,7 +1,6 @@
 from .ts_reader import TimeSeriesReader
 from datetime import datetime
 from pytz import FixedOffset
-#import iso8601
 import logging
 import numpy as np
 import pandas as pd
@@ -29,17 +28,24 @@ except ImportError:
             logger.critical('No ElementTree API available')
 
 
-def tz_localize(df, offset_in_hours):
-    """
+def tz_localize(df, offset_in_hours=0, copy=True):
+    """Localize tz-naive TimeSeries to a fixed-offset time zone.
 
-    df: instance of pandas.DataFrame
-    offset_in_hours:
-    """
+    Most time zones are offset from UTC by a whole number of hours,
+    but a few are offset by 30 or 45 minutes. An offset of 0 is
+    special-cased to return UTC.
 
-    offset_in_minutes = offset_in_hours * 60
-    if not offset_in_minutes.is_integer():
-        raise ValueError
-    df.tz_localize(FixedOffset(int(offset_in_minutes)), copy=False)
+    Parameters
+    ----------
+    df : instance of pandas.DataFrame having a tz-naive DatetimeIndex.
+    offset_in_hours : fixed offset in hours from UTC, e.g. -6 or +9.5.
+    copy : boolean, default True - make a copy of the underlying data.
+
+    Returns
+    -------
+    instance of pandas.DataFrame having a tz-aware DatetimeIndex.
+    """
+    return df.tz_localize(FixedOffset(offset_in_hours * 60), copy=copy)
 
 
 class EventTarget(object):
@@ -75,8 +81,8 @@ class EventTarget(object):
             # Pandas 0.8.1 has an issue with timezone-aware datetime objects:
             # ValueError: Tz-aware datetime.datetime cannot be converted to
             # datetime64 unless utc=True. Works in 0.9.0.dev-b9848a6.
-            # For the time being, let's work with naive datetimes.
-            # iso8601.parse_date can handle fixed UTC offsets.
+            # Localizing naive TimeSeries afterwards is a strategy
+            # that appears to work with 0.8.1 too.
             datetime_str = "%s %s" % (attrib['date'], attrib['time'])
             format_str = "%Y-%m-%d %H:%M:%S"
             self.datetimes.append(datetime.strptime(datetime_str, format_str))
@@ -108,7 +114,7 @@ class EventTarget(object):
                 index=self.datetimes
                 )
             if 'timeZone' in self.metadata:
-                tz_localize(df, self.metadata['timeZone'])
+                tz_localize(df, self.metadata['timeZone'], copy=False)
             self.dfs.append(df)
         elif tag.endswith('missVal'):
             self.is_missVal = False

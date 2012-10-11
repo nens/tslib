@@ -16,7 +16,6 @@ class CassandraWriter(object):
         colname_format = '%Y-%m-%dT%H:%M:%S%z'
         with self.cf.batch(queue_size=self.qs) as b:
             for df in dataframes:
-                print json.dumps(df)
                 for timestamp, row in df.iterrows():
                     b.insert(
                         timestamp.strftime(key_format),

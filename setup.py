@@ -12,6 +12,7 @@ install_requires = [
     'setuptools',
     'pandas',
     'pycassa',
+    'xmltodict',
     ],
 
 tests_require = [

@@ -5,6 +5,10 @@ from pycassa.cassandra.ttypes import NotFoundException
 import json
 import pandas as pd
 import pycassa
+import pytz
+
+
+INTERNAL_TIMEZONE = pytz.UTC
 
 
 class BucketSize:
@@ -66,12 +70,12 @@ class CassandraReader(TimeSeriesReader):
         bucket = bucket_size(sensor_id)
 
         key_format = sensor_id + ":" + bucket_format(bucket)
-        stamp = bucket_start(start, bucket)
+        stamp = bucket_start(start.astimezone(INTERNAL_TIMEZONE), bucket)
         delta = bucket_delta(bucket)
 
         colname_format = '%Y-%m-%dT%H:%M:%SZ'
-        col_start = start.strftime(colname_format)
-        col_end = end.strftime(colname_format)
+        col_start = start.astimezone(INTERNAL_TIMEZONE).strftime(colname_format)
+        col_end = end.astimezone(INTERNAL_TIMEZONE).strftime(colname_format)
 
         datetimes = {}
         data = {}

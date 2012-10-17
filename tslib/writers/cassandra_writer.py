@@ -13,7 +13,7 @@ class CassandraWriter(object):
     def write(self, dataframes):
         sensor_id = 'pixml-test'
         key_format = sensor_id + ':%Y-%m'
-        colname_format = '%Y-%m-%dT%H:%M:%S%z'
+        colname_format = '%Y-%m-%dT%H:%M:%S'
         with self.cf.batch(queue_size=self.qs) as b:
             for df in dataframes:
                 for timestamp, row in df.iterrows():

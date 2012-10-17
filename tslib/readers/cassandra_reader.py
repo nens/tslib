@@ -88,9 +88,9 @@ class CassandraReader(TimeSeriesReader):
                     if (key in params) or (len(params) == 0):
                         if not dt in datetimes.keys():
                             datetimes[dt] = {}
-                            datetimes[dt][key] = chunk[col_name]
-                            if not key in data.keys():
-                                data[key] = []
+                        datetimes[dt][key] = chunk[col_name]
+                        if not key in data.keys():
+                            data[key] = []
             except NotFoundException:
                 pass
             stamp += delta

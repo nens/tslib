@@ -1,5 +1,9 @@
-import pycassa
 import json
+import pycassa
+import pytz
+
+
+INTERNAL_TIMEZONE = pytz.UTC
 
 
 class CassandraWriter(object):
@@ -17,8 +21,9 @@ class CassandraWriter(object):
         with self.cf.batch(queue_size=self.qs) as b:
             for df in dataframes:
                 for timestamp, row in df.iterrows():
+                    ts_int = timestamp.astimezone(INTERNAL_TIMEZONE)
                     b.insert(
-                        timestamp.strftime(key_format),
-                        dict(("%s_%s" % (timestamp.strftime(colname_format), k),
+                        ts_int.strftime(key_format),
+                        dict(("%s_%s" % (ts_int.strftime(colname_format), k),
                               str(v)) for k, v in row.to_dict().iteritems())
                     )

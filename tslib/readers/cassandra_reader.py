@@ -83,6 +83,8 @@ class CassandraReader(TimeSeriesReader):
         # From each bucket within in the specified range, get the columns
         # within the specified range.
         while stamp < end:
+            print "Get " + stamp.strftime(key_format) + " with filter " + \
+                col_start + " " + col_end
             try:
                 chunk = self.cf.get(stamp.strftime(key_format),
                     column_start=col_start, column_finish=col_end)

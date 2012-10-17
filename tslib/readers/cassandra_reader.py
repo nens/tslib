@@ -65,7 +65,13 @@ class CassandraReader(TimeSeriesReader):
     def read(self, sensor_id, start, end, params=[]):
         assert start.tzinfo != None, "Start datetime must be timezone aware"
         assert end.tzinfo != None, "End datetime must be timezone aware"
-
+        assert str(start.tzinfo.utcoffset(start))[1:] == ':00:00' or \
+            str(start.tzinfo.utcoffset(start))[1:] == ':30:00', \
+            "Start datetime has weird utc offset; use tz.localize"
+        assert str(end.tzinfo.utcoffset(end))[1:] == ':00:00' or \
+            str(end.tzinfo.utcoffset(end))[1:] == ':30:00', \
+            "End datetime has weird utc offset; use tz.localize"
+        
         # The bucket size defines how much data is on one Cassandra row.
         bucket = bucket_size(sensor_id)
 

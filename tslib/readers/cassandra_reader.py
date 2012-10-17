@@ -59,6 +59,9 @@ class CassandraReader(TimeSeriesReader):
         self.cf = pycassa.ColumnFamily(pool, column_family)
 
     def read(self, sensor_id, start, end, params=[]):
+        assert start.tzinfo != None, "Start datetime must be timezone aware"
+        assert end.tzinfo != None, "End datetime must be timezone aware"
+
         # The bucket size defines how much data is on one Cassandra row.
         bucket = bucket_size(sensor_id)
 
@@ -66,7 +69,7 @@ class CassandraReader(TimeSeriesReader):
         stamp = bucket_start(start, bucket)
         delta = bucket_delta(bucket)
 
-        colname_format = '%Y-%m-%dT%H:%M:%S'
+        colname_format = '%Y-%m-%dT%H:%M:%SZ'
         col_start = start.strftime(colname_format)
         col_end = end.strftime(colname_format)
 
@@ -80,8 +83,8 @@ class CassandraReader(TimeSeriesReader):
                 chunk = self.cf.get(stamp.strftime(key_format),
                     column_start=col_start, column_finish=col_end)
                 for col_name in chunk:
-                    dt = col_name[:19]
-                    key = col_name[20:]
+                    dt = col_name[:20]
+                    key = col_name[21:]
                     if (key in params) or (len(params) == 0):
                         if not dt in datetimes.keys():
                             datetimes[dt] = {}

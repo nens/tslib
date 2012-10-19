@@ -15,7 +15,7 @@ class CassandraWriter(object):
         self.qs = queue_size
 
     def write(self, dataframes):
-        key_format = '%Y-%m'
+        key_format = '%Y'
         colname_format = '%Y-%m-%dT%H:%M:%SZ'
         i = 0
         with self.cf.batch(queue_size=self.qs) as b:

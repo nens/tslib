@@ -19,7 +19,7 @@ class BucketSize:
 
 
 def bucket_size(sensor_id):
-    return BucketSize.MONTHLY
+    return BucketSize.YEARLY
 
 
 def bucket_format(bucketsize):

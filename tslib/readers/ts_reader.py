@@ -1,5 +1,4 @@
 class TimeSeriesReader(object):
 
-    @staticmethod
-    def read(source):
+    def get_series(self):
         raise NotImplementedError

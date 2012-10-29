@@ -31,6 +31,7 @@ except ImportError:
 NS = 'http://www.wldelft.nl/fews/PI'
 TIMEZONE = '{%s}timeZone' % NS
 SERIES = '{%s}series' % NS
+EVENT = '{%s}event' % NS
 
 
 class PiXmlReader(TimeSeriesReader):
@@ -45,11 +46,9 @@ class PiXmlReader(TimeSeriesReader):
 
         for _, series in etree.iterparse(self.source, tag=SERIES):
 
-            iterator = series.iterchildren()
-
-            header = iterator.next()
-            metadata = xmltodict.parse(etree.tostring(header))['header']
-            missVal = metadata['missVal']
+            header = series[0]
+            metadata = xmltodict.parse(etree.tostring(header))
+            missVal = metadata['header']['missVal']
 
             datetimes = []
             values = []
@@ -57,12 +56,14 @@ class PiXmlReader(TimeSeriesReader):
             comments = []
             users = []
 
+            iterator = series.iterchildren(tag=EVENT)
+
             for event in iterator:
-                date = event.attrib['date']
-                time = event.attrib['time']
-                datetime_str = "%sT%s" % (date, time)
-                format_str = "%Y-%m-%dT%H:%M:%S"
-                datetimes.append(datetime.strptime(datetime_str, format_str))
+                d = event.attrib['date']
+                t = event.attrib['time']
+                datetimes.append(datetime(
+                    int(d[0:4]), int(d[5:7]), int(d[8:10]),
+                    int(t[0:2]), int(t[3:5]), int(t[6:8])))
                 value = event.attrib['value']
                 values.append(value if value != missVal else "NaN")
                 flags.append(event.attrib.get('flag', None))

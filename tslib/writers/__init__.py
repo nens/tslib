@@ -1,2 +1,2 @@
 # package
-from cassandra_writer import *
+from pi_xml_writer import *

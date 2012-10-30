@@ -32,6 +32,7 @@ NS = 'http://www.wldelft.nl/fews/PI'
 TIMEZONE = '{%s}timeZone' % NS
 SERIES = '{%s}series' % NS
 EVENT = '{%s}event' % NS
+COMMENT = '{%s}comment' % NS
 
 
 class PiXmlReader(TimeSeriesReader):
@@ -81,11 +82,16 @@ class PiXmlReader(TimeSeriesReader):
 
             dataframe = pd.DataFrame(data=data, index=datetimes)
 
-            series.clear()
-
             if series.getparent()[0].tag == TIMEZONE:
                 offset = float(series.getparent()[0].text or 0)
                 tz_localize(dataframe, offset, copy=False)
+
+            if series[-1].tag == COMMENT:
+                comment = series[-1]
+                if comment.text is not None:
+                    metadata[u'comment'] = unicode(comment.text)
+
+            series.clear()
 
             yield metadata, dataframe
 

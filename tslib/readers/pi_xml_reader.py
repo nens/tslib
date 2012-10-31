@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from .ts_reader import TimeSeriesReader
 from datetime import datetime
 from pytz import FixedOffset
@@ -43,7 +45,13 @@ class PiXmlReader(TimeSeriesReader):
         self.source = source
 
     def get_series(self):
-        """docstring"""
+        """docstring
+
+        Metadata is returned as a dict:
+        https://github.com/martinblech/xmltodict
+        http://www.xml.com/pub/a/2006/05/31/⏎
+        converting-between-xml-and-json.html
+        """
 
         for _, series in etree.iterparse(self.source, tag=SERIES):
 

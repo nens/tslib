@@ -16,11 +16,11 @@ To build pandas, we'll need Python header files (installing it via your package 
 
 	sudo apt-get install python-dev
 
-The `zc.buildout <http://www.buildout.org/>`_ software, which is used for building tslib, has a dependency on the setuptools package, which provides manipulation facilities for Python eggs. It will automatically be installed upon bootstrapping if not already present, but may also be installed beforehand::
+The `zc.buildout <http://www.buildout.org/>`_ software, which is used for building tslib, has a dependency on the setuptools package, which provides manipulation facilities for Python eggs. It will automatically be installed upon bootstrapping if not already present, but it may be convenient to install it beforehand::
 
 	sudo apt-get install python-setuptools
 
-If all is well, tslib should now build smoothly::
+If all is well and `git <http://git-scm.com/>`_ is present, tslib should now build smoothly::
 
 	git clone https://github.com/nens/tslib.git
 	cd tslib

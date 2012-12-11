@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<TimeSeries version="1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.wldelft.nl/fews/PI">
+  <timeZone>0</timeZone>
+  <series>
+    <header>
+      <type>instantaneous</type>
+      <locationId>raai_1</locationId>
+      <parameterId>SafetyFactor</parameterId>
+      <timeStep unit="second" divider="1" multiplier="10" />
+      <startDate date="2012-10-16" time="12:01:28" />
+      <endDate date="2012-10-16" time="12:01:28" />
+      <forecastDate date="0001-01-01" time="00:00:00" />
+      <missVal>NaN</missVal>
+      <units>-</units>
+    </header>
+    <event date="2012-10-16" time="12:01:28" value="1.795" flag="0" />
+    <comment>foo</comment>
+  </series>
+  <series>
+    <header>
+      <type>instantaneous</type>
+      <locationId>raai_2</locationId>
+      <parameterId>SafetyFactor</parameterId>
+      <timeStep unit="second" divider="1" multiplier="10" />
+      <startDate date="2012-10-16" time="12:01:28" />
+      <endDate date="2012-10-16" time="12:01:28" />
+      <forecastDate date="0001-01-01" time="00:00:00" />
+      <missVal>NaN</missVal>
+      <units>-</units>
+    </header>
+    <event date="2012-10-16" time="12:01:28" value="2.341" flag="0" />
+    <comment></comment>
+  </series>
+</TimeSeries>

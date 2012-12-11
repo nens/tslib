@@ -5,7 +5,7 @@ Changelog of tslib
 0.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Updated README.txt.
 
 
 0.0.2 (2012-10-12)

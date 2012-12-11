@@ -9,5 +9,9 @@ class TestPiXmlReader(unittest.TestCase):
 
     def test_0010(self):
         source = os.path.join(DATA_DIR, "time_series.xml")
-        PiXmlReader.read(source)
+        reader = PiXmlReader(source)
+        for md, df in reader.get_series():
+            # TODO: verify metadata
+            # TODO: verify dataframe
+            pass
         self.assertTrue(True)

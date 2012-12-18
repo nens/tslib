@@ -13,7 +13,7 @@
       <missVal>NaN</missVal>
       <units>-</units>
     </header>
-    <event date="2012-10-16" time="12:01:28" value="1.795" flag="0" />
+    <event date="2012-10-16" time="12:01:28" value="1.795" flag="0" comment="a comment" user="a user" />
     <comment>foo</comment>
   </series>
   <series>
@@ -28,7 +28,7 @@
       <missVal>NaN</missVal>
       <units>-</units>
     </header>
-    <event date="2012-10-16" time="12:01:28" value="2.341" flag="0" />
+    <event date="2012-10-16" time="12:01:28" value="2.341" flag="0" comment="another comment" user="another user" />
     <comment></comment>
   </series>
 </TimeSeries>

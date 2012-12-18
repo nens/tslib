@@ -1,2 +1,2 @@
 # package
-from pi_xml_reader import *
+from tslib.readers.pi_xml_reader import PiXmlReader  # NOQA

@@ -1,34 +1,17 @@
 # coding=utf-8
 
-from .ts_reader import TimeSeriesReader
 from datetime import datetime
-from pytz import FixedOffset
 import logging
+
+from lxml import etree
+from pytz import FixedOffset
 import numpy as np
 import pandas as pd
 import xmltodict
 
-logger = logging.getLogger(__name__)
+from tslib.readers.ts_reader import TimeSeriesReader
 
-try:
-    # Fastest?
-    from lxml import etree
-    assert etree  # Silence pyflakes
-    logger.info('Running with lxml.etree')
-except ImportError:
-    try:
-        # Faster?
-        import xml.etree.cElementTree as etree
-        assert etree  # Silence pyflakes
-        logger.info('Running with xml.etree.cElementTree')
-    except ImportError:
-        try:
-            # Fast?
-            import xml.etree.ElementTree as etree
-            assert etree  # Silence pyflakes
-            logger.info('Running with xml.etree.ElementTree')
-        except:
-            logger.critical('No ElementTree API available')
+logger = logging.getLogger(__name__)
 
 NS = 'http://www.wldelft.nl/fews/PI'
 TIMEZONE = '{%s}timeZone' % NS

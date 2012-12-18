@@ -1,5 +1,6 @@
 [report]
 omit =
+    */.local/*
     */migrations/*
     */test*
     /Library/*

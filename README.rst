@@ -16,6 +16,10 @@ To build pandas, we'll need Python header files (installing it via your package 
 
 	sudo apt-get install python-dev
 
+For fast XML parsing, `lxml <http://lxml.de/>`_ is used (lxml can also be build from source via pip, as long as libxml2-dev and libxslt-dev are installed)::
+
+	sudo apt-get install python-lxml
+
 The `zc.buildout <http://www.buildout.org/>`_ software, which is used for building tslib, has a dependency on the setuptools package, which provides manipulation facilities for Python eggs. It will automatically be installed upon bootstrapping if not already present, but it may be convenient to have it around globally::
 
 	sudo apt-get install python-setuptools

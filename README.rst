@@ -16,7 +16,7 @@ To build pandas, we'll need Python header files (installing it via your package 
 
 	sudo apt-get install python-dev
 
-For fast XML parsing, `lxml <http://lxml.de/>`_ is used (lxml can also be build from source via pip, as long as libxml2-dev and libxslt-dev are installed)::
+For fast XML parsing, `lxml <http://lxml.de/>`_ is used (lxml can also be built from source via pip, as long as libxml2-dev and libxslt-dev are installed)::
 
 	sudo apt-get install python-lxml
 
@@ -30,3 +30,7 @@ If all is well and `git <http://git-scm.com/>`_ is present, tslib should now bui
 	cd tslib
 	python bootstrap.py
 	bin/buildout
+
+You can verify this by running the tests::
+
+	bin/test

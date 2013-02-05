@@ -9,9 +9,11 @@ long_description = '\n\n'.join([
     ])
 
 install_requires = [
-    'setuptools',
+    'lxml',
+    'numpy',
     'pandas',
     'pytz',
+    'setuptools',
     'xmltodict',
     ],
 

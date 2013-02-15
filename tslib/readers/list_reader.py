@@ -47,7 +47,6 @@ class ListReader(TimeSeriesReader):
                 row = data[dt]
                 for key in keys:
                     data_flat[key].append(row.get(key))
-            print "=="
 
             dataframe = pd.DataFrame(data=data_flat, index=datetimes)
 

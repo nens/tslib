@@ -20,10 +20,6 @@ For fast XML parsing, `lxml <http://lxml.de/>`_ is used (lxml can also be built 
 
 	sudo apt-get install python-lxml
 
-The `zc.buildout <http://www.buildout.org/>`_ software, which is used for building tslib, has a dependency on the setuptools package, which provides manipulation facilities for Python eggs. It will automatically be installed upon bootstrapping if not already present, but it may be convenient to have it around globally::
-
-	sudo apt-get install python-setuptools
-
 If all is well and `git <http://git-scm.com/>`_ is present, tslib should now build smoothly::
 
 	git clone https://github.com/nens/tslib.git

@@ -1,2 +1,2 @@
 # package
-from pi_xml_writer import *
+from tslib.writers.pi_xml_writer import PiXmlWriter  # NOQA

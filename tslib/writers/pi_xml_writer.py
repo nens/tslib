@@ -45,6 +45,9 @@ class PiXmlWriter(TimeSeriesWriter):
         header = etree.XML(header)
         series.append(header)
 
+        if dataframe.empty:
+            return
+
         if hasattr(self, 'tz') and dataframe.index.tz is not None:
             dataframe.tz_convert(self.tz, copy=False)
 

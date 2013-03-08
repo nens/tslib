@@ -27,6 +27,20 @@ class PiXmlReader(TimeSeriesReader):
         """docstring"""
         self.source = source
 
+    def get_tz(self):
+        """Return the offset in hours from UTC as a float.
+
+        Note that pi xml deals with fixed offsets only. See:
+        http://fews.wldelft.nl/schemas/version1.0/pi-schemas/pi_sharedtypes.xsd
+
+        A return value of None means that no `timeZone` element is present.
+        An empty `timeZone` will return the default value, i.e. `0.0`.
+
+        """
+        for _, element in etree.iterparse(self.source):
+            if element.tag == TIMEZONE:
+                return float(element.text or 0.0)
+
     def get_series(self):
         """docstring
 
@@ -62,20 +76,31 @@ class PiXmlReader(TimeSeriesReader):
                 comments.append(event.attrib.get('comment', None))
                 users.append(event.attrib.get('user', None))
 
-            data = {'value': np.array(values, np.float)}
+            if values:
 
-            if any(flags):
-                data['flag'] = flags
-            if any(comments):
-                data['comment'] = comments
-            if any(users):
-                data['user'] = users
+                # Construct a pandas DataFrame from the events.
 
-            dataframe = pd.DataFrame(data=data, index=datetimes)
+                data = {'value': np.array(values, np.float)}
 
-            if series.getparent()[0].tag == TIMEZONE:
-                offset = float(series.getparent()[0].text or 0)
-                tz_localize(dataframe, offset, copy=False)
+                if any(flags):
+                    data['flag'] = flags
+                if any(comments):
+                    data['comment'] = comments
+                if any(users):
+                    data['user'] = users
+
+                dataframe = pd.DataFrame(data=data, index=datetimes)
+
+                if series.getparent()[0].tag == TIMEZONE:
+                    offset = float(series.getparent()[0].text or 0)
+                    tz_localize(dataframe, offset, copy=False)
+
+            else:
+
+                # No events. The `minOccurs` attribute of the
+                # `event` element is 0, so this valid XML.
+
+                dataframe = None
 
             if series[-1].tag == COMMENT:
                 comment = series[-1]

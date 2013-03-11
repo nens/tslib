@@ -15,6 +15,13 @@ DATE_FMT = '%Y-%m-%d'
 TIME_FMT = '%H:%M:%S'
 
 
+def set_datetime(md, df):
+    md['header']['startDate']['@date'] = df.index[0].strftime(DATE_FMT)
+    md['header']['startDate']['@time'] = df.index[0].strftime(TIME_FMT)
+    md['header']['endDate']['@date'] = df.index[-1].strftime(DATE_FMT)
+    md['header']['endDate']['@time'] = df.index[-1].strftime(TIME_FMT)
+
+
 class PiXmlWriter(TimeSeriesWriter):
     """docstring"""
 
@@ -40,6 +47,10 @@ class PiXmlWriter(TimeSeriesWriter):
         """docstring"""
         series = etree.SubElement(self.root, 'series')
 
+        if not dataframe.empty:
+            dataframe.tz_convert(self.tz, copy=False)
+            set_datetime(metadata, dataframe)
+
         header = xmltodict.unparse(metadata)
         header = bytes(bytearray(header, encoding='utf-8'))
         header = etree.XML(header)
@@ -47,9 +58,6 @@ class PiXmlWriter(TimeSeriesWriter):
 
         if dataframe.empty:
             return
-
-        if hasattr(self, 'tz') and dataframe.index.tz is not None:
-            dataframe.tz_convert(self.tz, copy=False)
 
         for idx, row in dataframe.iterrows():
             event = etree.SubElement(series, 'event')

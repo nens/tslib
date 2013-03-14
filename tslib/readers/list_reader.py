@@ -11,6 +11,7 @@ from tslib.readers.ts_reader import TimeSeriesReader
 
 INTERNAL_TIMEZONE = pytz.UTC
 COLNAME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+COLNAME_FORMAT_MS = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 
 class ListReader(TimeSeriesReader):
@@ -29,7 +30,11 @@ class ListReader(TimeSeriesReader):
             data = {}
             keys = []
             for event in series.get('events'):
-                dt = datetime.strptime(event.get('datetime'), COLNAME_FORMAT)
+                dt = event.get('datetime')
+                try:
+                    dt = datetime.strptime(dt, COLNAME_FORMAT)
+                except ValueError:
+                    dt = datetime.strptime(dt, COLNAME_FORMAT_MS)
                 dt = INTERNAL_TIMEZONE.localize(dt)
                 for key in event.keys():
                     if key != 'datetime':

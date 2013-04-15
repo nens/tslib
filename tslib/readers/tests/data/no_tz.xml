@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TimeSeries
+    xsi:schemaLocation="http://www.wldelft.nl/fews/PI http://fews.wldelft.nl/schemas/version1.0/pi-schemas/pi_timeseries.xsd"
+    version="1.2" xmlns="http://www.wldelft.nl/fews/PI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <series>
+        <header>
+            <type>instantaneous</type>
+            <locationId>600</locationId>
+            <parameterId>P1212</parameterId>
+            <qualifierId>foo</qualifierId>
+            <qualifierId>bar</qualifierId>
+            <timeStep unit="nonequidistant"/>
+            <startDate date="2010-04-03" time="00:00:00"/>
+            <endDate date="2010-04-12" time="00:00:00"/>
+            <missVal/>
+            <stationName>blower 1</stationName>
+            <units>uur/dag</units>
+            <thresholds>
+                <highLevelThreshold id="foo" name ="bar" value="0.9"/>
+                <highLevelThreshold id="xxx" name ="yyy" value="1.9"/>
+            </thresholds>
+        </header>
+        <event date="2010-04-03" time="00:00:00" value="20" flag="2"/>
+        <event date="2010-04-04" time="00:00:00" value="22" flag="2"/>
+        <event date="2010-04-05" time="00:00:00" value="17" flag="2"/>
+        <event date="2010-04-06" time="00:00:00" value="20" flag="2"/>
+        <event date="2010-04-07" time="00:00:00" value="21" flag="2"/>
+        <event date="2010-04-08" time="00:00:00" value="-999.0" flag="2"/>
+        <event date="2010-04-09" time="00:00:00" value="24" flag="2"/>
+        <event date="2010-04-10" time="00:00:00" value="-999.0" flag="2"/>
+        <event date="2010-04-11" time="00:00:00" value="24" flag="2"/>
+        <event date="2010-04-12" time="00:00:00" value="22" flag="2"/>
+    </series>
+    <series>
+        <header>
+            <type>instantaneous</type>
+            <locationId>700</locationId>
+            <parameterId>P1213</parameterId>
+            <timeStep unit="nonequidistant"/>
+            <startDate date="2010-04-03" time="00:00:00"/>
+            <endDate date="2010-04-12" time="00:00:00"/>
+            <missVal>-999.0</missVal>
+            <stationName>blower 2</stationName>
+            <units>uur/dag</units>
+        </header>
+        <event date="2010-04-03" time="02:00:00" value="50"/>
+        <event date="2010-04-04" time="02:00:00" value="52"/>
+        <event date="2010-04-05" time="02:00:00" value="57"/>
+        <event date="2010-04-06" time="02:00:00" value="50"/>
+        <event date="2010-04-07" time="02:00:00" value="51"/>
+        <event date="2010-04-08" time="02:00:00" value="-999.0"/>
+        <event date="2010-04-09" time="02:00:00" value="54"/>
+        <event date="2010-04-10" time="02:00:00" value="-999.0"/>
+        <event date="2010-04-11" time="02:00:00" value="54"/>
+        <event date="2010-04-12" time="02:00:00" value="52"/>
+    </series>
+</TimeSeries>

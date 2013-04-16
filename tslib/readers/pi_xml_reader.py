@@ -21,7 +21,17 @@ COMMENT = '{%s}comment' % NS
 
 
 class PiXmlReader(TimeSeriesReader):
-    """docstring"""
+    """Read a PI XML file.
+
+    See: https://publicwiki.deltares.nl/display/FEWSDOC/Delft-
+    Fews+Published+Interface+timeseries+Format+(PI)+Import
+
+    Time series are returned as a Pandas dataframe and a
+    dictionary containing metadata. An effort has been
+    made to achieve a fair balance between speed and
+    resource consumption.
+
+    """
 
     def __init__(self, source):
         """docstring"""
@@ -42,7 +52,7 @@ class PiXmlReader(TimeSeriesReader):
                 return float(element.text or 0.0)
 
     def get_series(self):
-        """docstring
+        """Return a (metadata, dataframe) tuple.
 
         Metadata is returned as a dict:
         https://github.com/martinblech/xmltodict

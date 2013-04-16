@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-import numpy as np
 import pandas as pd
 import pytz
 
@@ -56,4 +55,3 @@ class ListReader(TimeSeriesReader):
             dataframe = pd.DataFrame(data=data_flat, index=datetimes)
 
             yield series.get('uuid'), dataframe
-

@@ -5,14 +5,15 @@ Changelog of tslib
 0.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Switched to MIT license.
+- Updated setup.py.
 
 
 0.0.3 (2013-04-16)
 ------------------
 
 - Updated README.txt.
-- Implemented PiXmlReader and PiXmlWriter
+- Implemented PiXmlReader and PiXmlWriter.
 - Implemented ListReader.
 
 

@@ -2,7 +2,7 @@ Changelog of tslib
 ==================
 
 
-0.0.4 (unreleased)
+0.0.4 (2013-05-13)
 ------------------
 
 - Switched to MIT license.

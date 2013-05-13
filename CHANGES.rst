@@ -2,6 +2,12 @@ Changelog of tslib
 ==================
 
 
+0.0.5 (unreleased)
+------------------
+
+- Nothing changed yet.
+
+
 0.0.4 (2013-05-13)
 ------------------
 

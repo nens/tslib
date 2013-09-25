@@ -58,6 +58,16 @@ class PiXmlReader(TimeSeriesReader):
         https://github.com/martinblech/xmltodict
         http://www.xml.com/pub/a/2006/05/31/⏎
         converting-between-xml-and-json.html
+
+        The dataframe's DatetimeIndex has the same time zone (offset)
+        as the PI XML, which is generally not UTC. If you need UTC,
+        the returned data frame can be converted as follows:
+
+        df.tz_convert('UTC', copy=False)
+
+        Caveat: the PI XML timeZone element is optional. In that
+        case, the DatetimeIndex has no time zone information.
+
         """
 
         for _, series in etree.iterparse(self.source, tag=SERIES):
@@ -138,5 +148,6 @@ def tz_localize(dataframe, offset_in_hours=0, copy=True):
     Returns
     -------
     instance of pandas.DataFrame having a tz-aware DatetimeIndex.
+
     """
     return dataframe.tz_localize(FixedOffset(offset_in_hours * 60), copy=copy)

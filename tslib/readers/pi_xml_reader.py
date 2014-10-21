@@ -79,6 +79,7 @@ class PiXmlReader(TimeSeriesReader):
             datetimes = []
             values = []
             flags = []
+            flag_sources = []
             comments = []
             users = []
 
@@ -93,6 +94,7 @@ class PiXmlReader(TimeSeriesReader):
                 value = event.attrib['value']
                 values.append(value if value != missVal else "NaN")
                 flags.append(event.attrib.get('flag', None))
+                flag_sources.append(event.attrib.get('flagSource', None))
                 comments.append(event.attrib.get('comment', None))
                 users.append(event.attrib.get('user', None))
 
@@ -100,10 +102,25 @@ class PiXmlReader(TimeSeriesReader):
 
                 # Construct a pandas DataFrame from the events.
 
+                # NB: np.float is shorthand for np.float64. This matches the
+                # "double" type of the "value" attribute in the XML Schema
+                # (an IEEE double-precision 64-bit floating-point number).
+
                 data = {'value': np.array(values, np.float)}
+
+                # The "flag" attribute in the XML Schema is of type "int".
+                # This corresponds to a signed 32-bit integer. NB: this
+                # is not the same as the "integer" type, which is an
+                # infinite set. TODO: should we bother casting or
+                # leave flags as strings?
 
                 if any(flags):
                     data['flag'] = flags
+
+                # The other attributes are of type "string".
+
+                if any(flag_sources):
+                    data['flagSource'] = flag_sources
                 if any(comments):
                     data['comment'] = comments
                 if any(users):

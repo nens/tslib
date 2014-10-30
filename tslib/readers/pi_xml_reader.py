@@ -1,8 +1,8 @@
 # coding=utf-8
 
-from datetime import datetime
 import logging
 
+from ciso8601 import parse_datetime
 from lxml import etree
 from pytz import FixedOffset
 import numpy as np
@@ -87,9 +87,7 @@ class PiXmlReader(TimeSeriesReader):
             for event in iterator:
                 d = event.attrib['date']
                 t = event.attrib['time']
-                datetimes.append(datetime(
-                    int(d[0:4]), int(d[5:7]), int(d[8:10]),
-                    int(t[0:2]), int(t[3:5]), int(t[6:8])))
+                datetimes.append(parse_datetime("{}T{}".format(d, t)))
                 value = event.attrib['value']
                 values.append(value if value != missVal else "NaN")
                 flags.append(event.attrib.get('flag', None))

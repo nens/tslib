@@ -9,6 +9,7 @@ long_description = '\n\n'.join([
     ])
 
 install_requires = [
+    'ciso8601',
     'lxml',
     'numpy',
     'pandas',

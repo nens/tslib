@@ -90,7 +90,7 @@ class PiXmlReader(TimeSeriesReader):
                 t = event.attrib['time']
                 datetimes.append(parse_datetime("{}T{}".format(d, t)))
                 value = event.attrib['value']
-                values.append(value if value != missVal else "NaN")
+                values.append(value if type(missVal)(value) != missVal else "NaN")
                 flags.append(event.attrib.get('flag', None))
                 flag_sources.append(event.attrib.get('flagSource', None))
                 comments.append(event.attrib.get('comment', None))

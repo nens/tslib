@@ -5,7 +5,8 @@ Changelog of tslib
 0.0.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Coerce type of value to type of missVal in PiXmlReader to avoid non
+  equality because of different types.
 
 
 0.0.5 (2014-10-30)

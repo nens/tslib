@@ -51,3 +51,26 @@ class TestPiXmlReader(unittest.TestCase):
         reader = PiXmlReader(source)
         for md, df in reader.get_series():
             self.assertEqual(None, df)
+
+    def test_parse_pi_xml_07(self):
+        """Parse a file."""
+        source = os.path.join(DATA_DIR, "time_series.xml")
+        reader = PiXmlReader(source)
+        for md, df in reader.bulk_get_series():
+            pass
+        self.assertTrue(True)
+
+    def test_parse_pi_xml_08(self):
+        """Parse a file having comment elements."""
+        source = os.path.join(DATA_DIR, "GDresults_dam.xml")
+        reader = PiXmlReader(source)
+        for md, df in reader.bulk_get_series():
+            pass
+        self.assertTrue(True)
+
+    def test_parse_pi_xml_09(self):
+        """Parse a file without events ."""
+        source = os.path.join(DATA_DIR, "no_events.xml")
+        reader = PiXmlReader(source)
+        for md, df in reader.bulk_get_series():
+            self.assertEqual(None, df)

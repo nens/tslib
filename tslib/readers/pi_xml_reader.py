@@ -180,6 +180,7 @@ class PiXmlReader(TimeSeriesReader):
         meta_data = []
 
         for _, series in etree.iterparse(self.source, tag=SERIES):
+            print(xmltodict.parse(etree.tostring(series[0])))
             header = xmltodict.parse(etree.tostring(series[0]))['header']
             series_code = get_code(header)
             miss_val = header['missVal']
@@ -190,7 +191,7 @@ class PiXmlReader(TimeSeriesReader):
                 "pru": header['parameterId'],
                 "unit": header.get('units', None),
                 "name": header['parameterId'],
-                "location_name": header.get('stationName', '')[:80]
+                "location_name": (header.get('stationName', '') or '')[:80]
             })
 
             for event in series.iterchildren(tag=EVENT):

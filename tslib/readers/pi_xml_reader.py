@@ -146,7 +146,7 @@ class PiXmlReader(TimeSeriesReader):
 
             yield metadata, dataframe
 
-    def bulk_get_series(self, chunk_size=75000):
+    def bulk_get_series(self, chunk_size=7500000):
         """Return a (metadata, dataframe) tuple.
 
         Metadata is returned as a dict:
@@ -180,14 +180,14 @@ class PiXmlReader(TimeSeriesReader):
         meta_data = []
 
         for _, series in etree.iterparse(self.source, tag=SERIES):
-            print(xmltodict.parse(etree.tostring(series[0])))
             header = xmltodict.parse(etree.tostring(series[0]))['header']
             series_code = get_code(header)
             miss_val = header['missVal']
+            location_code = header['locationId']
 
             meta_data.append({
                 "code": series_code,
-                "location_code": header['locationId'],
+                "location_code": location_code,
                 "pru": header['parameterId'],
                 "unit": header.get('units', None),
                 "name": header['parameterId'],
@@ -201,6 +201,7 @@ class PiXmlReader(TimeSeriesReader):
                 bulk_data["datetime"].append(
                     parse_datetime("{}T{}".format(d, t)))
                 bulk_data["code"].append(series_code)
+                bulk_data["location_code"].append(location_code)
 
                 # add the data
                 value = event.attrib['value']
@@ -224,18 +225,17 @@ class PiXmlReader(TimeSeriesReader):
                     offset = float(series.getparent()[0].text or 0)
                     tz_localize(dataframe, offset, copy=False)
 
-                if series[-1].tag == COMMENT:
+                if series is not None and series[-1].tag == COMMENT:
                     comment = series[-1]
                     if comment.text is not None:
                         meta_data[-1][u'comment'] = unicode(comment.text)
 
                 series.clear()
-
                 yield pd.DataFrame(meta_data), dataframe
 
                 # Return empty metadata if all data was yielded or else the
                 # last metadata.
-                meta_data = [] if len(bulk_data["value"]) else meta_data[-1:]
+                meta_data = [] if not bulk_data["value"] else meta_data[-1:]
 
         if bulk_data["value"]:
             # There is still some data left smaller than the chunk size. We
@@ -270,7 +270,7 @@ def take_dataframe_from_bulk(bulk_data, chunk_size):
             if any(bulk_data[column])
         })
 
-    set_data(value=np.float, code=str)
+    set_data(value=np.float, location_code=str, code=str)
     set_if_any(flag=np.int32, flag_source=str, comment=str, user=str)
 
     dataframe = pd.DataFrame(

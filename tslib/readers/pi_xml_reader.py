@@ -146,7 +146,7 @@ class PiXmlReader(TimeSeriesReader):
 
             yield metadata, dataframe
 
-    def bulk_get_series(self, chunk_size=7500000):
+    def bulk_get_series(self, chunk_size=250000):
         """Return a (metadata, dataframe) tuple.
 
         Metadata is returned as a dict:
@@ -165,17 +165,13 @@ class PiXmlReader(TimeSeriesReader):
         """
         bulk_data = {
             "code": [],
-            "name": [],
             "comment": [],
-            "datetime": [],
+            "timestamp": [],
             "flag_source": [],
             "flag": [],
             "location_code": [],
-            "pru": [],
-            "unit": [],
             "user": [],
             "value": [],
-            "last_value_decimal": [],
         }
         meta_data = []
 
@@ -191,14 +187,16 @@ class PiXmlReader(TimeSeriesReader):
                 "pru": header['parameterId'],
                 "unit": header.get('units', None),
                 "name": header['parameterId'],
-                "location_name": (header.get('stationName', '') or '')[:80]
+                "location_name": (header.get('stationName', '') or '')[:80],
+                "lat": header.get('lat', None),
+                "lon": header.get('lon', None)
             })
 
             for event in series.iterchildren(tag=EVENT):
                 # create timestamp and code rows, these will form the index
                 d = event.attrib['date']
                 t = event.attrib['time']
-                bulk_data["datetime"].append(
+                bulk_data["timestamp"].append(
                     parse_datetime("{}T{}".format(d, t)))
                 bulk_data["code"].append(series_code)
                 bulk_data["location_code"].append(location_code)
@@ -223,7 +221,7 @@ class PiXmlReader(TimeSeriesReader):
 
                 if series.getparent()[0].tag == TIMEZONE:
                     offset = float(series.getparent()[0].text or 0)
-                    tz_localize(dataframe, offset, copy=False)
+                    tz_localize(dataframe, offset, copy=False, level=0)
 
                 if series is not None and series[-1].tag == COMMENT:
                     comment = series[-1]
@@ -269,13 +267,17 @@ def take_dataframe_from_bulk(bulk_data, chunk_size):
             column: dtype for column, dtype in columns_and_dtypes.items()
             if any(bulk_data[column])
         })
+        for column in columns_and_dtypes.keys():
+            if not any(bulk_data[column]):
+                bulk_data[column] = bulk_data[column][chunk_size:]
 
     set_data(value=np.float, location_code=str, code=str)
     set_if_any(flag=np.int32, flag_source=str, comment=str, user=str)
-
-    dataframe = pd.DataFrame(
-        data=data, index=bulk_data["datetime"][:chunk_size])
-    bulk_data["datetime"] = bulk_data["datetime"][chunk_size:]
+    data["timestamp"] = bulk_data["timestamp"][:chunk_size]
+    dataframe = pd.DataFrame(data=data)
+    dataframe.set_index(['timestamp', 'location_code', 'code'],
+                        inplace=True, drop=False)
+    bulk_data["timestamp"] = bulk_data["timestamp"][chunk_size:]
     return dataframe
 
 
@@ -303,7 +305,7 @@ def get_code(header):
     return code
 
 
-def tz_localize(dataframe, offset_in_hours=0, copy=True):
+def tz_localize(dataframe, offset_in_hours=0, copy=True, level=None):
     """Localize tz-naive TimeSeries to a fixed-offset time zone.
 
     Most time zones are offset from UTC by a whole number of hours,
@@ -321,4 +323,5 @@ def tz_localize(dataframe, offset_in_hours=0, copy=True):
     instance of pandas.DataFrame having a tz-aware DatetimeIndex.
 
     """
-    return dataframe.tz_localize(FixedOffset(offset_in_hours * 60), copy=copy)
+    return dataframe.tz_localize(
+        FixedOffset(offset_in_hours * 60), copy=copy, level=level)

@@ -223,7 +223,7 @@ class PiXmlReader(TimeSeriesReader):
                     offset = float(series.getparent()[0].text or 0)
                     tz_localize(dataframe, offset, copy=False, level=0)
 
-                if series is not None and series[-1].tag == COMMENT:
+                if series and series[-1].tag == COMMENT:
                     comment = series[-1]
                     if comment.text is not None:
                         meta_data[-1][u'comment'] = unicode(comment.text)
@@ -281,7 +281,6 @@ def take_dataframe_from_bulk(bulk_data, chunk_size):
     return dataframe
 
 
-# TODO: this is an actual copy of the hydra-core method. Move it to this lib.
 def get_code(header):
     """Construct an ID from a PI XML time series header.
 

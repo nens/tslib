@@ -2,10 +2,16 @@ Changelog of tslib
 ==================
 
 
-0.0.6 (unreleased)
+0.0.7 (unreleased)
 ------------------
 
 - Nothing changed yet.
+
+
+0.0.6 (2018-07-09)
+------------------
+
+- Added bulk_get_series method to PiXmlReader.
 
 
 0.0.5 (2014-10-30)

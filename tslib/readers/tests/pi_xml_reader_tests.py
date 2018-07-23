@@ -82,7 +82,7 @@ class BulkTestPiXmlReader(unittest.TestCase):
         """Parse a file."""
         source = os.path.join(DATA_DIR, "time_series.xml")
         reader = PiXmlReader(source)
-        for md, df in reader.bulk_get_series():
+        for md, df in reader.bulk_get_series(chunk_size=5):
             pass
         self.assertTrue(True)
 
@@ -90,7 +90,7 @@ class BulkTestPiXmlReader(unittest.TestCase):
         """Parse a file having comment elements."""
         source = os.path.join(DATA_DIR, "GDresults_dam.xml")
         reader = PiXmlReader(source)
-        for md, df in reader.bulk_get_series():
+        for md, df in reader.bulk_get_series(chunk_size=5):
             pass
         self.assertTrue(True)
 
@@ -101,32 +101,18 @@ class BulkTestPiXmlReader(unittest.TestCase):
         tz = reader.get_tz()
         self.assertEqual(1.0, tz)
 
-    def test_parse_pi_xml_04(self):
-        """Parse a file with empty timeZone element."""
-        source = os.path.join(DATA_DIR, "empty_tz.xml")
-        reader = PiXmlReader(source)
-        tz = reader.get_tz()
-        self.assertEqual(0.0, tz)
-
-    def test_parse_pi_xml_05(self):
-        """Parse a file without timeZone element."""
-        source = os.path.join(DATA_DIR, "no_tz.xml")
-        reader = PiXmlReader(source)
-        tz = reader.get_tz()
-        self.assertEqual(None, tz)
-
     def test_parse_pi_xml_06(self):
         """Parse a file without events ."""
         source = os.path.join(DATA_DIR, "no_events.xml")
         reader = PiXmlReader(source)
-        for md, df in reader.bulk_get_series():
+        for md, df in reader.bulk_get_series(chunk_size=5):
             self.assertEqual(None, df)
 
     def test_parse_pi_xml_07(self):
         """Parse a file."""
         source = os.path.join(DATA_DIR, "time_series.xml")
         reader = PiXmlReader(source)
-        for md, df in reader.bulk_get_series():
+        for md, df in reader.bulk_get_series(chunk_size=300):
             pass
         self.assertTrue(True)
 
@@ -134,7 +120,7 @@ class BulkTestPiXmlReader(unittest.TestCase):
         """Parse a file having comment elements."""
         source = os.path.join(DATA_DIR, "GDresults_dam.xml")
         reader = PiXmlReader(source)
-        for md, df in reader.bulk_get_series():
+        for md, df in reader.bulk_get_series(chunk_size=5):
             pass
         self.assertTrue(True)
 
@@ -142,5 +128,5 @@ class BulkTestPiXmlReader(unittest.TestCase):
         """Parse a file without events ."""
         source = os.path.join(DATA_DIR, "no_events.xml")
         reader = PiXmlReader(source)
-        for md, df in reader.bulk_get_series():
+        for md, df in reader.bulk_get_series(chunk_size=5):
             self.assertEqual(None, df)

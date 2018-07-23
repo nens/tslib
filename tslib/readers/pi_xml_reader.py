@@ -186,14 +186,13 @@ class PiXmlReader(TimeSeriesReader):
         Caveat: the PI XML timeZone element is optional. In that
         case, the DatetimeIndex has no time zone information.
         """
+        meta_data = []
+
         # initialize a counter to index into the 'bulk_data' array
         i = 0
 
         # by default, do not localize
         tz_offset = None
-
-        # keep track whether metadata needs to be reset
-        clean_metadata = True
 
         for series_i, (_, series) in enumerate(
                 fast_iterparse(self.source, tag=SERIES)):
@@ -211,10 +210,6 @@ class PiXmlReader(TimeSeriesReader):
                 comment = series[-1].text
             else:
                 comment = None
-
-            if clean_metadata:
-                meta_data = []
-                clean_metadata = False
 
             meta_data.append({
                 "code": series_code,
@@ -247,6 +242,11 @@ class PiXmlReader(TimeSeriesReader):
                         "value": np.empty(chunk_size, dtype=np.float64),
                     }
 
+                    # check if we need the leftover metadata from the prev iter
+                    if len(meta_data) > 0:
+                        if meta_data[0]['code'] != series_code:
+                            meta_data = []
+
                 # create timestamp and code rows, these will form the index
                 d = event.attrib['date']
                 t = event.attrib['time']
@@ -274,9 +274,6 @@ class PiXmlReader(TimeSeriesReader):
 
                     # keep the last metadata entry
                     meta_data = meta_data[-1:]
-
-                    # set a flag to clean the metadata on the next iteration
-                    clean_metadata = True
 
         if i > 0:
             # There is still some data left smaller than the chunk size. We
@@ -320,7 +317,6 @@ def dataframe_from_bulk(data, tz_offset):
     return dataframe
 
 
-# TODO: this is an actual copy of the hydra-core method. Move it to this lib.
 def get_code(header):
     """Construct an ID from a PI XML time series header.
 

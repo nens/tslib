@@ -245,7 +245,7 @@ class PiXmlReader(TimeSeriesReader):
                     # check if we need the leftover metadata from the prev iter
                     if len(meta_data) > 0:
                         if meta_data[0]['code'] != series_code:
-                            meta_data = []
+                            meta_data = meta_data[1:]
 
                 # create timestamp and code rows, these will form the index
                 d = event.attrib['date']

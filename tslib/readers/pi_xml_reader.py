@@ -236,7 +236,8 @@ class PiXmlReader(TimeSeriesReader):
                         "timestamp": np.empty(chunk_size,
                                               dtype='datetime64[ms]'),
                         "flag_source": np.empty(chunk_size, dtype=object),
-                        "flag": np.empty(chunk_size, dtype=np.int32),
+                        # use float64 to allow np.nan values
+                        "flag": np.empty(chunk_size, dtype=np.float64),
                         "location_code": np.empty(chunk_size, dtype=object),
                         "user": np.empty(chunk_size, dtype=object),
                         "value": np.empty(chunk_size, dtype=np.float64),
@@ -257,7 +258,7 @@ class PiXmlReader(TimeSeriesReader):
                 # add the data
                 value = event.attrib['value']
                 bulk_data["value"][i] = value if value != miss_val else np.nan
-                bulk_data["flag"][i] = event.attrib.get('flag', 0)
+                bulk_data["flag"][i] = event.attrib.get('flag', np.nan)
                 bulk_data["flag_source"][i] = \
                     event.attrib.get('flagSource', None)
                 bulk_data["comment"][i] = event.attrib.get('comment', None)

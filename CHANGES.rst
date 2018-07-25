@@ -5,7 +5,10 @@ Changelog of tslib
 0.0.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Clear lxml memory usage after each iteration in `bulk_get_series`
+
+- Used preinitialized numpy arrays instead of appending lists to record the
+  data in `bulk_get_series`.
 
 
 0.0.6 (2018-07-09)

@@ -2,7 +2,7 @@ Changelog of tslib
 ==================
 
 
-0.0.7 (unreleased)
+0.0.7 (2018-07-25)
 ------------------
 
 - Clear lxml memory usage after each iteration in `bulk_get_series`

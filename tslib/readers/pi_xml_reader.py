@@ -218,8 +218,8 @@ class PiXmlReader(TimeSeriesReader):
                 "unit": header.get('units', None),
                 "name": header['parameterId'],
                 "location_name": (header.get('stationName', '') or '')[:80],
-                "lat": header.get('lat', np.nan),
-                "lon": header.get('lon', np.nan),
+                "lat": float(header.get('lat', np.nan)),
+                "lon": float(header.get('lon', np.nan)),
                 "comment": comment,
             })
 

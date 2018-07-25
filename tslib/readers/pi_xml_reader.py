@@ -1,4 +1,10 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
+# (c) Nelen & Schuurmans, see LICENSE.rst.
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import logging
 
@@ -18,6 +24,23 @@ TIMEZONE = '{%s}timeZone' % NS
 SERIES = '{%s}series' % NS
 EVENT = '{%s}event' % NS
 COMMENT = '{%s}comment' % NS
+
+
+def fast_iterparse(source, **kwargs):
+    """ A version of lxml.etree.iterparse that cleans up its own memory usage
+
+    See also:
+        https://www.ibm.com/developerworks/xml/library/x-hiperfparse/
+    """
+    for event, elem in etree.iterparse(source, **kwargs):
+        yield event, elem
+
+        # It's safe to call clear here because no descendants will be accessed
+        elem.clear()
+
+        # Also eliminate now-empty references from the root node to `elem`
+        while elem.getprevious() is not None:
+            del elem.getparent()[0]
 
 
 class PiXmlReader(TimeSeriesReader):
@@ -163,23 +186,30 @@ class PiXmlReader(TimeSeriesReader):
         Caveat: the PI XML timeZone element is optional. In that
         case, the DatetimeIndex has no time zone information.
         """
-        bulk_data = {
-            "code": [],
-            "comment": [],
-            "timestamp": [],
-            "flag_source": [],
-            "flag": [],
-            "location_code": [],
-            "user": [],
-            "value": [],
-        }
         meta_data = []
 
-        for _, series in etree.iterparse(self.source, tag=SERIES):
+        # initialize a counter to index into the 'bulk_data' array
+        i = 0
+
+        # by default, do not localize
+        tz_offset = None
+
+        for series_i, (_, series) in enumerate(
+                fast_iterparse(self.source, tag=SERIES)):
             header = xmltodict.parse(etree.tostring(series[0]))['header']
             series_code = get_code(header)
             miss_val = header['missVal']
             location_code = header['locationId']
+
+            # get the timezone offset, only for the first entry
+            if series_i == 0 and series.getparent()[0].tag == TIMEZONE:
+                tz_offset = FixedOffset(
+                    float(series.getparent()[0].text or 0) * 60)
+
+            if series[-1].tag == COMMENT:
+                comment = series[-1].text
+            else:
+                comment = None
 
             meta_data.append({
                 "code": series_code,
@@ -188,96 +218,103 @@ class PiXmlReader(TimeSeriesReader):
                 "unit": header.get('units', None),
                 "name": header['parameterId'],
                 "location_name": (header.get('stationName', '') or '')[:80],
-                "lat": header.get('lat', None),
-                "lon": header.get('lon', None)
+                "lat": float(header.get('lat', np.nan)),
+                "lon": float(header.get('lon', np.nan)),
+                "comment": comment,
             })
 
             for event in series.iterchildren(tag=EVENT):
+                if i == 0:
+                    # the first in this chunk: init the bulk_data
+
+                    # NB: np.float is shorthand for np.float64. This matches the
+                    # "double" type of the "value" attribute in the XML Schema
+                    # (an IEEE double-precision 64-bit floating-point number).
+                    bulk_data = {
+                        "code": np.empty(chunk_size, dtype=object),
+                        "comment": np.empty(chunk_size, dtype=object),
+                        "timestamp": np.empty(chunk_size,
+                                              dtype='datetime64[ms]'),
+                        "flag_source": np.empty(chunk_size, dtype=object),
+                        # use float64 to allow np.nan values
+                        "flag": np.empty(chunk_size, dtype=np.float64),
+                        "location_code": np.empty(chunk_size, dtype=object),
+                        "user": np.empty(chunk_size, dtype=object),
+                        "value": np.empty(chunk_size, dtype=np.float64),
+                    }
+
+                    # check if we need the leftover metadata from the prev iter
+                    if len(meta_data) > 0:
+                        if meta_data[0]['code'] != series_code:
+                            meta_data = meta_data[1:]
+
                 # create timestamp and code rows, these will form the index
                 d = event.attrib['date']
                 t = event.attrib['time']
-                bulk_data["timestamp"].append(
-                    parse_datetime("{}T{}".format(d, t)))
-                bulk_data["code"].append(series_code)
-                bulk_data["location_code"].append(location_code)
+                bulk_data["timestamp"][i] = "{}T{}".format(d, t)
+                bulk_data["code"][i] = series_code
+                bulk_data["location_code"][i] = location_code
 
                 # add the data
                 value = event.attrib['value']
-                bulk_data["value"].append(
-                    value if value != miss_val else "NaN")
-                bulk_data["flag"].append(event.attrib.get('flag', None))
-                bulk_data["flag_source"].append(
-                    event.attrib.get('flagSource', None))
-                bulk_data["comment"].append(event.attrib.get('comment', None))
-                bulk_data["user"].append(event.attrib.get('user', None))
+                bulk_data["value"][i] = value if value != miss_val else np.nan
+                bulk_data["flag"][i] = event.attrib.get('flag', np.nan)
+                bulk_data["flag_source"][i] = \
+                    event.attrib.get('flagSource', None)
+                bulk_data["comment"][i] = event.attrib.get('comment', None)
+                bulk_data["user"][i] = event.attrib.get('user', None)
 
-            while len(bulk_data["value"]) >= chunk_size:
-                # Construct a pandas DataFrame from the events.
+                i += 1
+                if i >= chunk_size:
+                    i = 0  # for next iter
 
-                # NB: np.float is shorthand for np.float64. This matches the
-                # "double" type of the "value" attribute in the XML Schema
-                # (an IEEE double-precision 64-bit floating-point number).
-                dataframe = take_dataframe_from_bulk(bulk_data, chunk_size)
+                    # Construct a pandas DataFrame from the events.
+                    dataframe = dataframe_from_bulk(bulk_data, tz_offset)
 
-                if series.getparent()[0].tag == TIMEZONE:
-                    offset = float(series.getparent()[0].text or 0)
-                    tz_localize(dataframe, offset, copy=False, level=0)
+                    yield pd.DataFrame(meta_data), dataframe
 
-                if series and series[-1].tag == COMMENT:
-                    comment = series[-1]
-                    if comment.text is not None:
-                        meta_data[-1][u'comment'] = unicode(comment.text)
+                    # keep the last metadata entry
+                    meta_data = meta_data[-1:]
 
-                series.clear()
-                yield pd.DataFrame(meta_data), dataframe
-
-                # Return empty metadata if all data was yielded or else the
-                # last metadata.
-                meta_data = [] if not bulk_data["value"] else meta_data[-1:]
-
-        if bulk_data["value"]:
+        if i > 0:
             # There is still some data left smaller than the chunk size. We
             # don't need to take care of cleaning up.
-            dataframe = take_dataframe_from_bulk(bulk_data, chunk_size)
+
+            for key, value in bulk_data.items():
+                bulk_data[key] = value[:i]
+
+            dataframe = dataframe_from_bulk(bulk_data, tz_offset)
             yield pd.DataFrame(meta_data), dataframe
 
 
-def take_dataframe_from_bulk(bulk_data, chunk_size):
+def dataframe_from_bulk(data, tz_offset):
     """
-    Create a Timeseries dataframe with a maximum of chunk_size rows.
+    Create a Timeseries dataframe from a dict of ndarrays.
 
     Args:
         bulk_data(dict):
-        chunk_size(int): max number of rows for the
+        tz_offset: pandas Offset or None
 
     Returns:
-        data_frame
-
+        pandas DataFrame object
     """
-    data = {}
+    timestamp = pd.DatetimeIndex(data['timestamp'])
+    if tz_offset is not None:
+        timestamp = timestamp.tz_localize(tz_offset)
 
-    def set_data(**columns_and_dtypes):
-        for column, dtype in columns_and_dtypes.items():
-            data[column] = np.array(
-                bulk_data[column][:chunk_size], dtype=dtype)
-            bulk_data[column] = bulk_data[column][chunk_size:]
+    index = pd.MultiIndex.from_arrays(
+        arrays=[
+            pd.Categorical(data['code']),
+            pd.Categorical(data['location_code']),
+            timestamp,
+        ],
+        names=['code', 'location_code', 'timestamp']
+    )
+    dataframe = pd.DataFrame(
+        data={k: data[k] for k in data if k not in index.names},
+        index=index
+    )
 
-    def set_if_any(**columns_and_dtypes):
-        set_data(**{
-            column: dtype for column, dtype in columns_and_dtypes.items()
-            if any(bulk_data[column])
-        })
-        for column in columns_and_dtypes.keys():
-            if not any(bulk_data[column]):
-                bulk_data[column] = bulk_data[column][chunk_size:]
-
-    set_data(value=np.float, location_code=str, code=str)
-    set_if_any(flag=np.int32, flag_source=str, comment=str, user=str)
-    data["timestamp"] = bulk_data["timestamp"][:chunk_size]
-    dataframe = pd.DataFrame(data=data)
-    dataframe.set_index(['timestamp', 'location_code', 'code'],
-                        inplace=True, drop=False)
-    bulk_data["timestamp"] = bulk_data["timestamp"][chunk_size:]
     return dataframe
 
 

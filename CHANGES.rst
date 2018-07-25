@@ -2,6 +2,12 @@ Changelog of tslib
 ==================
 
 
+0.0.8 (unreleased)
+------------------
+
+- Nothing changed yet.
+
+
 0.0.7 (2018-07-25)
 ------------------
 

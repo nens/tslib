@@ -2,7 +2,7 @@ Changelog of tslib
 ==================
 
 
-0.0.8 (unreleased)
+0.0.8 (2019-01-31)
 ------------------
 
 - Added check for double timeseries in PiXML on read.

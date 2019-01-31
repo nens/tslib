@@ -92,6 +92,7 @@ class PiXmlReader(TimeSeriesReader):
         case, the DatetimeIndex has no time zone information.
 
         """
+        self._check_duplicates()
 
         for _, series in etree.iterparse(self.source, tag=SERIES):
 
@@ -169,6 +170,24 @@ class PiXmlReader(TimeSeriesReader):
 
             yield metadata, dataframe
 
+    def _check_duplicates(self):
+        """
+        Checks whether location_code and timeseries code duplicates exist.
+
+        Raises ValueError when duplicates are found.
+        """
+        check_set = set()
+        for series_i, (_, series) in enumerate(
+                fast_iterparse(self.source, tag=SERIES)):
+            header = xmltodict.parse(etree.tostring(series[0]))['header']
+            k = (get_code(header), header['locationId'])
+            if k in check_set:
+                raise ValueError(
+                    'PiXML import failed because of duplicate Timeseries for '
+                    'timeseries_code "%s", location_code "%s" and file "%s".' %
+                    (k[0], k[1], self.source))
+            check_set.add(k)
+
     def bulk_get_series(self, chunk_size=250000):
         """Return a (metadata, dataframe) tuple.
 
@@ -186,6 +205,8 @@ class PiXmlReader(TimeSeriesReader):
         Caveat: the PI XML timeZone element is optional. In that
         case, the DatetimeIndex has no time zone information.
         """
+        self._check_duplicates()
+
         meta_data = []
 
         # initialize a counter to index into the 'bulk_data' array

@@ -177,8 +177,7 @@ class PiXmlReader(TimeSeriesReader):
         Raises ValueError when duplicates are found.
         """
         check_set = set()
-        for series_i, (_, series) in enumerate(
-                fast_iterparse(self.source, tag=SERIES)):
+        for _, series in fast_iterparse(self.source, tag=SERIES):
             header = xmltodict.parse(etree.tostring(series[0]))['header']
             k = (get_code(header), header['locationId'])
             if k in check_set:

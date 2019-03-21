@@ -5,7 +5,8 @@ Changelog of tslib
 0.0.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Instead of breaking off an import when a duplicate timeseries is
+  encountered, show a warning, ignore the duplicate, and continue.
 
 
 0.0.8 (2019-01-31)

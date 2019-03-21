@@ -2,7 +2,7 @@ Changelog of tslib
 ==================
 
 
-0.0.9 (unreleased)
+0.0.9 (2019-03-21)
 ------------------
 
 - Instead of breaking off an import when a duplicate timeseries is

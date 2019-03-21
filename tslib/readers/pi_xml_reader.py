@@ -203,7 +203,7 @@ class PiXmlReader(TimeSeriesReader):
             location_code = header['locationId']
 
             if (series_code, location_code) in duplicate_check_set:
-                logger.warning(
+                logger.info(
                     'PiXML import skipped an entry because of duplicate for '
                     'timeseries_code "%s", location_code "%s" and file "%s".',
                     series_code, location_code, self.source

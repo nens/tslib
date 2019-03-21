@@ -92,12 +92,11 @@ class PiXmlReader(TimeSeriesReader):
         case, the DatetimeIndex has no time zone information.
 
         """
-        self._check_duplicates()
-
         for _, series in etree.iterparse(self.source, tag=SERIES):
 
             header = series[0]
             metadata = xmltodict.parse(etree.tostring(header))
+
             missVal = metadata['header']['missVal']
 
             datetimes = []
@@ -170,23 +169,6 @@ class PiXmlReader(TimeSeriesReader):
 
             yield metadata, dataframe
 
-    def _check_duplicates(self):
-        """
-        Checks whether location_code and timeseries code duplicates exist.
-
-        Raises ValueError when duplicates are found.
-        """
-        check_set = set()
-        for _, series in fast_iterparse(self.source, tag=SERIES):
-            header = xmltodict.parse(etree.tostring(series[0]))['header']
-            k = (get_code(header), header['locationId'])
-            if k in check_set:
-                raise ValueError(
-                    'PiXML import failed because of duplicate Timeseries for '
-                    'timeseries_code "%s", location_code "%s" and file "%s".' %
-                    (k[0], k[1], self.source))
-            check_set.add(k)
-
     def bulk_get_series(self, chunk_size=250000):
         """Return a (metadata, dataframe) tuple.
 
@@ -204,8 +186,7 @@ class PiXmlReader(TimeSeriesReader):
         Caveat: the PI XML timeZone element is optional. In that
         case, the DatetimeIndex has no time zone information.
         """
-        self._check_duplicates()
-
+        duplicate_check_set = set()
         meta_data = []
 
         # initialize a counter to index into the 'bulk_data' array
@@ -220,6 +201,16 @@ class PiXmlReader(TimeSeriesReader):
             series_code = get_code(header)
             miss_val = header['missVal']
             location_code = header['locationId']
+
+            if (series_code, location_code) in duplicate_check_set:
+                logger.warning(
+                    'PiXML import skipped an entry because of duplicate for '
+                    'timeseries_code "%s", location_code "%s" and file "%s".',
+                    series_code, location_code, self.source
+                )
+                continue
+
+            duplicate_check_set.add((series_code, location_code))
 
             # get the timezone offset, only for the first entry
             if series_i == 0 and series.getparent()[0].tag == TIMEZONE:

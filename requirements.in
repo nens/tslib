@@ -1,0 +1,7 @@
+ciso8601
+lxml
+numpy
+pandas
+pytz
+setuptools
+xmltodict

@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 # (c) Nelen & Schuurmans, see LICENSE.rst.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import logging
 
-from ciso8601 import parse_datetime
-from lxml import etree
-from pytz import FixedOffset
 import numpy as np
 import pandas as pd
 import xmltodict
+from ciso8601 import parse_datetime
+from lxml import etree
+from pytz import FixedOffset
 
 from tslib.readers.ts_reader import TimeSeriesReader
 
@@ -127,7 +122,7 @@ class PiXmlReader(TimeSeriesReader):
                 # "double" type of the "value" attribute in the XML Schema
                 # (an IEEE double-precision 64-bit floating-point number).
 
-                data = {'value': np.array(values, np.float)}
+                data = {'value': np.array(values, float)}
 
                 # The "flag" attribute in the XML Schema is of type "int".
                 # This corresponds to a signed 32-bit integer. NB: this
@@ -163,7 +158,7 @@ class PiXmlReader(TimeSeriesReader):
             if series[-1].tag == COMMENT:
                 comment = series[-1]
                 if comment.text is not None:
-                    metadata[u'comment'] = unicode(comment.text)
+                    metadata[u'comment'] = comment.text
 
             series.clear()
 

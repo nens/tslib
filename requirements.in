@@ -3,5 +3,4 @@ lxml
 numpy
 pandas
 pytz
-setuptools
 xmltodict

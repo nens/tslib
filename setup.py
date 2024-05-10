@@ -14,11 +14,11 @@ install_requires = [
     'numpy',
     'pandas',
     'pytz',
-    'setuptools',
     'xmltodict',
     ],
 
 tests_require = [
+    'pytest',
     ]
 
 setup(name='tslib',

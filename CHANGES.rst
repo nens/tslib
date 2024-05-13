@@ -5,7 +5,9 @@ Changelog of tslib
 0.0.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix AttributeError: module 'numpy' has no attribute 'float'.
+
+- Remove old buildout stuff and introduce pip-tools.
 
 
 0.0.9 (2019-03-21)

@@ -2,7 +2,7 @@ Changelog of tslib
 ==================
 
 
-0.0.10 (unreleased)
+0.0.10 (2024-05-13)
 -------------------
 
 - Fix AttributeError: module 'numpy' has no attribute 'float'.

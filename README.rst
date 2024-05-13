@@ -5,7 +5,7 @@ Yet another attempt to create a useful nens library for manipulating time series
 
 Building tslib
 --------------
- Clone the repo and install the requirements::
+::
 
 	git clone https://github.com/nens/tslib.git
 	cd tslib

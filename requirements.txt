@@ -6,7 +6,7 @@
 #
 ciso8601==2.3.1
     # via -r requirements.in
-lxml==5.2.1
+lxml==5.2.2
     # via -r requirements.in
 numpy==1.24.4
     # via

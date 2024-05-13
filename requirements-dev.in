@@ -1,0 +1,5 @@
+-c requirements.in
+
+pip-tools
+pytest
+pytest-cov
